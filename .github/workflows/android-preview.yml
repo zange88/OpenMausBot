@@ -1,0 +1,33 @@
+name: Android preview APK
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [build/android-preview]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Build APKs
+        run: |
+          cd android
+          ./gradlew --no-daemon :app:assemblePreview :app:assembleDebug
+      - name: Upload APKs
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: |
+            android/app/build/outputs/apk/preview/app-preview.apk
+            android/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
+          retention-days: 7
